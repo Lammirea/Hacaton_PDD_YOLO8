@@ -9,13 +9,13 @@ import intersect_human_car as IHC
 def isViolationImage(SOURCE_IMAGE_PATH):
 
     # load a pre-trained or custom-trained model
-    modelDetect = YOLO('ViolationDetect_with_YOLO/models/detection/train5/weights/best.pt')
-    modelSegmentLines = YOLO('ViolationDetect_with_YOLO/models/segmentation/train/weights/best.pt')
-    modelSegmentCross = YOLO('ViolationDetect_with_YOLO/models/segmentation/train2/weights/best.pt')
+    modelDetect = YOLO('detection.pt')
+    modelSegmentLines = YOLO('segmentLines.pt')
+    modelSegmentCross = YOLO('segmentCrosswalk.pt')
 
     # read an image
     #image = cv2.imread(SOURCE_IMAGE_PATH)
-    resultsDetect = modelDetect.predict(SOURCE_IMAGE_PATH)
+    resultsDetect = modelDetect.predict(SOURCE_IMAGE_PATH,show=True,conf=0.2,save=True)
     resultsSegmentLines = modelSegmentLines.predict(SOURCE_IMAGE_PATH)
     resultsSegmentCross = modelSegmentCross.predict(SOURCE_IMAGE_PATH)
 
@@ -24,6 +24,7 @@ def isViolationImage(SOURCE_IMAGE_PATH):
         # logging.exception("Ошибка валидации!")
 
     findViolation(resultsDetect, resultsSegmentLines, resultsSegmentCross)
+
 
 def check_successLightCross(list1, list2):
     # Проверяем, что элементы 1 и 2 из list1 точно присутствуют в list2
@@ -157,4 +158,4 @@ def findViolation(resultsDetect,resultsSegLine,resultsSegCross ):
     
 
 if __name__=="__main__":
-    isViolationImage('test_yolo/проезд_на_красный/00012.jpg')
+    isViolationImage('C:/Users/Venya/OneDrive/Документы/Универ/Хакатон_ПДД/test_yolo/проезд_на_красный/00011.jpg')
