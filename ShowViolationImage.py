@@ -25,44 +25,13 @@ def isViolationImage(SOURCE_IMAGE_PATH):
 
     findViolation(resultsDetect, resultsSegmentLines, resultsSegmentCross)
 
-# def check_intersection(rectangle1, rectangle2):
-#     """Проверяет, пересекаются ли два четырёхугольника"""
-#     x1, y1, x2, y2 = rectangle1
-#     x3, y3, x4, y4 = rectangle2
-    
-#     # Проверяем пересечение по осям X и Y
-#     if (x1 < x4 and x3 < x2 and y1 < y4 and y3 < y2):
-#         return True
-#     else:
-#         return False
-
-# def find_intersecting_rectangles(coordinates):
-#     """Находит пересекающиеся четырёхугольники в массиве координат"""
-#     intersecting_rectangles = []
-    
-#     for i in range(len(coordinates)):
-#         for j in range(i+1, len(coordinates)):
-#             if check_intersection(coordinates[i], coordinates[j]):
-#                 intersecting_rectangles.append((coordinates[i], coordinates[j]))
-    
-#     return intersecting_rectangles
-
-# def check_name_intersection(list1, list2):
-#     # Проверяем, что первые два элемента list1 есть в list2
-#     if list1[:2] == list2[:2]:
-#         # Проверяем, что хотя бы один из оставшихся элементов list1 есть в list2
-#         if any(x in list2 for x in list1[2:]):
-#             return True
-#     return False
-
-# def find_indexes_and_coordinates(list1, list2, list3):
-#     """Находит индексы элементов из list1 в list2 и их координаты в list3"""
-#     indexes_coordinates = []
-    
-#     for item in list1:
-#         indexes = [i for i, x in enumerate(list2) if x == item]
-#         for index in indexes:
-#             indexes_coordinates.append((list3[index]))
+def check_successLightCross(list1, list2):
+    # Проверяем, что элементы 1 и 2 из list1 точно присутствуют в list2
+    if all(x in list2 for x in [list1[0], list1[1]]):
+        # Проверяем, что хотя бы один из крайних элементов list1 есть в list2
+        if list1[0] in list2 or list1[-1] in list2:
+            return True
+    return False
 
 def find_indexes_crossHumans(list1, list2):
     """Находит индексы элементов 'crosswalk' и 'humans' в list2"""
@@ -135,16 +104,17 @@ def findViolation(resultsDetect,resultsSegLine,resultsSegCross ):
 
     #1) проверка на переход пешеходом на красный свет (без разницы какого светофора)
     selected_classes = ["crosswalk","humans","red_pedestrian_light","red_traffic_light"]
-    # Находим индексы элементов 'crosswalk' и 'humans' в list2
-    cross_indexes, humans_indexes = find_indexes_crossHumans(selected_classes, classes)
+    if(check_successLightCross(selected_classes,classes)):
+        # Находим индексы элементов 'crosswalk' и 'humans' в list2
+        cross_indexes, humans_indexes = find_indexes_crossHumans(selected_classes, classes)
 
-    # Получаем координаты элементов 'crosswalk' и 'humans' из list3
-    cross_coordinates = get_coordinates(cross_indexes, coordinates)
-    humans_coordinates = get_coordinates(humans_indexes, coordinates)
+        # Получаем координаты элементов 'crosswalk' и 'humans' из list3
+        cross_coordinates = get_coordinates(cross_indexes, coordinates)
+        humans_coordinates = get_coordinates(humans_indexes, coordinates)
 
-    # Проверяем пересечение координат 'crosswalk' и 'humans'
-    if check_intersection(cross_coordinates[0], humans_coordinates[0]):
-        print("Нарушение! Зафиксирован переход пешеходом на красный свет")
+        # Проверяем пересечение координат 'crosswalk' и 'humans'
+        if check_intersection(cross_coordinates[0], humans_coordinates[0]):
+            print("Нарушение! Зафиксирован переход пешеходом на красный свет")
 
 
     #2) проверка на проезд машины на красный    
@@ -169,13 +139,14 @@ def findViolation(resultsDetect,resultsSegLine,resultsSegCross ):
         
     #4) машина пересекла сплошную
     selected_classes = ["car", "solid_white"]
-    car_indexes, solid_white_indexes = find_indexes_solidCar(selected_classes, classes)
+    if all(ele in classes for ele in selected_classes):
+        car_indexes, solid_white_indexes = find_indexes_solidCar(selected_classes, classes)
 
-    car_coordinates = get_coordinates(car_indexes, coordinates)
-    solid_white_coordinates = get_coordinates(solid_white_indexes, coordinates)
+        car_coordinates = get_coordinates(car_indexes, coordinates)
+        solid_white_coordinates = get_coordinates(solid_white_indexes, coordinates)
 
-    if check_intersection(car_coordinates[0], solid_white_coordinates[0]):
-        print("Нарушение! Пересечение сплошной")
+        if check_intersection(car_coordinates[0], solid_white_coordinates[0]):
+            print("Нарушение! Пересечение сплошной")
 
 
     #5) машина остановилась у знака "парковка запрещена"
@@ -186,4 +157,4 @@ def findViolation(resultsDetect,resultsSegLine,resultsSegCross ):
     
 
 if __name__=="__main__":
-    isViolationImage('test_yolo/переход_на_красный_свет/00013.jpg')
+    isViolationImage('test_yolo/проезд_на_красный/00012.jpg')
