@@ -65,9 +65,21 @@ def FindViolationInVideo(cap, modelDetect, modelSegmentLines, modelSegmentCross,
     violations = []
 
     w, h, fps = (int(cap.get(x)) for x in (cv2.CAP_PROP_FRAME_WIDTH, cv2.CAP_PROP_FRAME_HEIGHT, cv2.CAP_PROP_FPS))
+    import shutil
+
+    # Get directory name
+
+    # Try to remove the tree; if it fails, throw an error using try...except.
+    try:
+        shutil.rmtree(f"response_files/{directory}")
+    except OSError as e:
+        print(e)
     p = f"response_files/{directory}"
     if not os.path.exists(p):
         os.makedirs(p)
+
+
+
 
     out = cv2.VideoWriter(f'response_files/{directory}/instance-segmentation.mp4', cv2.VideoWriter_fourcc(*'XVID'), fps,
                           (w, h))
