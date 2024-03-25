@@ -4,6 +4,7 @@ import uvicorn
 from fastapi import FastAPI, UploadFile
 
 import showViolationImage
+import showViolationVideo
 
 #http://92.53.97.223:8081
 apiUrl = "http://localhost:5122/files/"
@@ -18,8 +19,11 @@ async def detect(file:UploadFile,  token:str):
     with open(filename, 'wb') as f:
         f.write(await file.read())
 
+    if "image" in file.content_type:
+        violations = showViolationImage.isViolationImage(filename, f"detected_{file.filename}")
+    if "video" in file.content_type:
+        violations = showViolationVideo.loadVideo(filename, f"detected_{file.filename}")
 
-    violations = showViolationImage.isViolationImage(filename, f"detected_{file.filename}")
     file_link = post_file(f"response_files/detected_{file.filename}/{file.filename}", file.content_type, token)
     return {"violationTypes": violations, "fileLink":file_link}
 
