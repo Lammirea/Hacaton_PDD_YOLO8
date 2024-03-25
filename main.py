@@ -15,7 +15,7 @@ app = FastAPI()
 
 
 @app.post("/detect")
-async def detect(file:UploadFile,  token:str):
+async def detect(file:UploadFile):
     filename = f"requests_files/{file.filename}"
 
     with open(filename, 'wb') as f:
