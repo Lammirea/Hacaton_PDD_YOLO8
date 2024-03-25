@@ -1,12 +1,12 @@
+import base64
+
 import requests
 import uvicorn
-
 from fastapi import FastAPI, UploadFile
 
 import showViolationImage
 import showViolationVideo
 
-#http://92.53.97.223:8081
 apiUrl = "http://localhost:5122/files/"
 
 app = FastAPI()
@@ -21,11 +21,12 @@ async def detect(file:UploadFile,  token:str):
 
     if "image" in file.content_type:
         violations = showViolationImage.isViolationImage(filename, f"detected_{file.filename}")
+        return {"violationTypes": violations, "Base64Content": toBase64(f"response_files/detected_{file.filename}/{file.filename}")}
+
     if "video" in file.content_type:
         violations = showViolationVideo.loadVideo(filename, f"detected_{file.filename}")
+        return {"violationTypes": violations, "Base64Content": toBase64(f"response_files/detected_{file.filename}/instance-segmentation.mp4")}
 
-    file_link = post_file(f"response_files/detected_{file.filename}/{file.filename}", file.content_type, token)
-    return {"violationTypes": violations, "fileLink":file_link}
 
 def post_file(filename, content_type, token):
     files = {'formFile': (filename, open(filename, 'rb'), content_type)}
@@ -35,6 +36,11 @@ def post_file(filename, content_type, token):
 
     return id
 
+def toBase64(filename):
+    with open(filename, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
+        return encoded_string
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+     uvicorn.run(app, host="0.0.0.0", port=8000)
 
