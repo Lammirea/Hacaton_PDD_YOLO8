@@ -17,10 +17,11 @@ def isViolationImage(SOURCE_IMAGE_PATH, sourceFileName):
     resultsSegmentCross = modelSegmentCross.predict(SOURCE_IMAGE_PATH)
 
     if (resultsDetect is None):
-        return print("Изображение не содержит удовлетворяющих объектов")
+        print("Изображение не содержит удовлетворяющих объектов")
+        return [0]
         # logging.exception("Ошибка валидации!")
 
-    findViolation(resultsDetect, resultsSegmentLines, resultsSegmentCross)
+    return findViolation(resultsDetect, resultsSegmentLines, resultsSegmentCross)
 
 
 def check_successLightCross(list1, list2):
@@ -98,7 +99,7 @@ def findViolation(resultsDetect, resultsSegLine, resultsSegCross):
         print("Box:", coordinates)
         print("Class:", classes)
 
-    # 0) проверка на переход пешеходом на красный свет (без разницы какого светофора)
+    # 1) проверка на переход пешеходом на красный свет (без разницы какого светофора)
     selected_classes = ["crosswalk", "humans", "red_pedestrian_light", "red_traffic_light"]
     if (check_successLightCross(selected_classes, classes)):
         # Находим индексы элементов 'crosswalk' и 'humans' в list2
@@ -110,16 +111,16 @@ def findViolation(resultsDetect, resultsSegLine, resultsSegCross):
 
         # Проверяем пересечение координат 'crosswalk' и 'humans'
         if check_intersection(cross_coordinates[0], humans_coordinates[0]):
-            violations.append(0)
+            violations.append(1)
             print("Нарушение! Зафиксирован переход пешеходом на красный свет")
 
-    # 1) проверка на проезд машины на красный
+    # 2) проверка на проезд машины на красный
     selected_classes = ["car", "red_traffic_light"]
     if (all(ele in classes for ele in selected_classes)):
-        violations.append(1)
+        violations.append(2)
         print("Нарушение! Машина проехала на красный свет")
 
-    # 2) машина не пропускает пешехода хотя горит зелёный свет
+    # 3) машина не пропускает пешехода хотя горит зелёный свет
     selected_classes = ["car", "crosswalk", "green_pedestrian", "humans"]
     if (all(ele in classes for ele in selected_classes)):
         # Находим индексы элементов list1 в list2
@@ -130,10 +131,10 @@ def findViolation(resultsDetect, resultsSegLine, resultsSegCross):
 
         # Проверяем пересечение координат всех трех элементов
         if check_intersection(coordinates["car"], coordinates["crosswalk"], coordinates["humans"]):
-            violations.append(2)
+            violations.append(3)
             print("Нарушение! Не пропустил пешехода.")
 
-    # 3) машина пересекла сплошную
+    # 4) машина пересекла сплошную
     selected_classes = ["car", "solid_white"]
     if all(ele in classes for ele in selected_classes):
         car_indexes, solid_white_indexes = find_indexes_solidCar(selected_classes, classes)
@@ -142,13 +143,13 @@ def findViolation(resultsDetect, resultsSegLine, resultsSegCross):
         solid_white_coordinates = get_coordinates(solid_white_indexes, coordinates)
 
         if check_intersection(car_coordinates[0], solid_white_coordinates[0]):
-            violations.append(3)
+            violations.append(4)
             print("Нарушение! Пересечение сплошной")
 
-    # 4) машина остановилась у знака "парковка запрещена"
+    # 5) машина остановилась у знака "парковка запрещена"
     selected_classes = ["car", "stop_sign"]
     if (all(ele in classes for ele in selected_classes)):
-        violations.append(4)
+        violations.append(5)
         print("Нарушение! Остановка у знака 'остановка запрещена'!")
 
     return violations

@@ -19,12 +19,12 @@ async def detect(file:UploadFile,  token:str):
         f.write(await file.read())
 
 
-    violations = showViolationImage.isViolationImage(filename, file.filename)
-    file_link = post_file(f"response_files/{file.filename}/{file.filename}", file.content_type, token)
+    violations = showViolationImage.isViolationImage(filename, f"detected_{file.filename}")
+    file_link = post_file(f"response_files/detected_{file.filename}/{file.filename}", file.content_type, token)
     return {"violationTypes": violations, "fileLink":file_link}
 
 def post_file(filename, content_type, token):
-    files = {'formFile': ("filename1234", open(filename, 'rb'))}
+    files = {'formFile': (filename, open(filename, 'rb'), content_type)}
     headers = {'Authorization': token}
     id = requests.post(apiUrl, headers=headers, files=files).json()
     print(id)
