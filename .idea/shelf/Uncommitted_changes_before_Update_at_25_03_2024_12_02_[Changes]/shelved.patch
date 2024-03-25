@@ -1,0 +1,27 @@
+Index: ShowViolationVideo.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/ShowViolationVideo.py b/showViolationVideo.py
+rename from ShowViolationVideo.py
+rename to showViolationVideo.py
+--- a/ShowViolationVideo.py	
++++ b/showViolationVideo.py	
+@@ -8,7 +8,7 @@
+ 
+ video_path = "C:/Users/Venya/OneDrive/Документы/Универ/Хакатон_ПДД/test_yolo/challenge.mp4"
+ 
+-def loadVideo(video_path):
++def loadVideo(video_path, sourceFileName):
+     modelDetect = YOLO('ViolationDetect_with_YOLO/detection.pt')
+     modelDetect.to(device)
+ 
+@@ -175,4 +175,4 @@
+     cv2.destroyAllWindows()
+ 
+ if __name__=="__main__":
+-    loadVideo(video_path)
+\ No newline at end of file
++    loadVideo(video_path, "")
+\ No newline at end of file

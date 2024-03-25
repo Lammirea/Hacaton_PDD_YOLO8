@@ -12,6 +12,19 @@ def isViolationImage(SOURCE_IMAGE_PATH, sourceFileName):
     # read an image
     # image = cv2.imread(SOURCE_IMAGE_PATH)
 
+    import os
+    import sys
+    import shutil
+
+    # Get directory name
+
+    # Try to remove the tree; if it fails, throw an error using try...except.
+    try:
+        shutil.rmtree(f"response_files/{sourceFileName}")
+    except OSError as e:
+        print(e)
+
+
     resultsDetect = modelDetect.predict(SOURCE_IMAGE_PATH, project="response_files", name=sourceFileName, conf=0.2, save=True, )
     resultsSegmentLines = modelSegmentLines.predict(SOURCE_IMAGE_PATH)
     resultsSegmentCross = modelSegmentCross.predict(SOURCE_IMAGE_PATH)

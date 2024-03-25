@@ -1,0 +1,32 @@
+Index: main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import requests\r\nimport uvicorn\r\n\r\nfrom fastapi import FastAPI, UploadFile\r\n\r\nimport showViolationImage\r\n\r\n#http://92.53.97.223:8081\r\napiUrl = \"http://localhost:5122/files/\"\r\n\r\napp = FastAPI()\r\n\r\n\r\n@app.post(\"/detect\")\r\nasync def detect(file:UploadFile,  token:str):\r\n    filename = f\"requests_files/{file.filename}\"\r\n\r\n    with open(filename, 'wb') as f:\r\n        f.write(await file.read())\r\n\r\n\r\n    violations = showViolationImage.isViolationImage(filename, f\"detected_{file.filename}\")\r\n    file_link = post_file(f\"response_files/detected_{file.filename}/{file.filename}\", file.content_type, token)\r\n    return {\"violationTypes\": violations, \"fileLink\":file_link}\r\n\r\ndef post_file(filename, content_type, token):\r\n    files = {'formFile': (filename, open(filename, 'rb'), content_type)}\r\n    headers = {'Authorization': token}\r\n    id = requests.post(apiUrl, headers=headers, files=files).json()\r\n    print(id)\r\n\r\n    return id\r\n\r\nif __name__ == \"__main__\":\r\n    uvicorn.run(app, host=\"0.0.0.0\", port=8000)\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/main.py b/main.py
+--- a/main.py	
++++ b/main.py	
+@@ -4,6 +4,7 @@
+ from fastapi import FastAPI, UploadFile
+ 
+ import showViolationImage
++import showViolationVideo
+ 
+ #http://92.53.97.223:8081
+ apiUrl = "http://localhost:5122/files/"
+@@ -18,8 +19,11 @@
+     with open(filename, 'wb') as f:
+         f.write(await file.read())
+ 
+-
+-    violations = showViolationImage.isViolationImage(filename, f"detected_{file.filename}")
++    if "image" in file.content_type:
++        violations = showViolationImage.isViolationImage(filename, f"detected_{file.filename}")
++    if "video" in file.content_type:
++        violations = showViolationVideo.loadVideo(filename, f"detected_{file.filename}")
++
+     file_link = post_file(f"response_files/detected_{file.filename}/{file.filename}", file.content_type, token)
+     return {"violationTypes": violations, "fileLink":file_link}
+ 

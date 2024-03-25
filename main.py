@@ -1,8 +1,10 @@
 import base64
 
-import requests
+#import requests
 import uvicorn
 from fastapi import FastAPI, UploadFile
+
+
 
 import showViolationImage
 import showViolationVideo
@@ -31,7 +33,6 @@ async def detect(file:UploadFile,  token:str):
 def post_file(filename, content_type, token):
     files = {'formFile': (filename, open(filename, 'rb'), content_type)}
     headers = {'Authorization': token}
-    id = requests.post(apiUrl, headers=headers, files=files).json()
     print(id)
 
     return id
